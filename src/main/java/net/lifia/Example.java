@@ -57,6 +57,9 @@ public class Example {
     }
 
     /**
+     * Example using rules and fixes to detect and repair DOM problems
+     * Explained here: https://any23.apache.org/dev-validation-fix.html
+     * Rule and Fix are in the validation package
      *
      * @throws IOException
      * @throws URISyntaxException
