@@ -4,12 +4,14 @@ import org.apache.any23.Any23;
 import org.apache.any23.extractor.ExtractionException;
 import org.apache.any23.http.HTTPClient;
 import org.apache.any23.source.DocumentSource;
+import org.apache.any23.source.FileDocumentSource;
 import org.apache.any23.source.HTTPDocumentSource;
 import org.apache.any23.writer.NTriplesWriter;
 import org.apache.any23.writer.TripleHandler;
 import org.apache.any23.writer.TripleHandlerException;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -32,14 +34,17 @@ public class Example {
 
     }
 
+
+    /**
+     * Basic data extraction is documented in this page: https://any23.apache.org/dev-data-extraction.html
+     * @throws IOException
+     * @throws URISyntaxException
+     * @throws ExtractionException
+     * @throws TripleHandlerException
+     */
     private static void exampleOkMicrodata() throws IOException, URISyntaxException, ExtractionException, TripleHandlerException {
         Any23 runner = new Any23();
-        runner.setHTTPUserAgent("test-user-agent");
-        HTTPClient httpClient = runner.getHTTPClient();
-        DocumentSource source = new HTTPDocumentSource(
-                httpClient,
-                "https://dl.dropboxusercontent.com/u/1921135/artery.html"
-        );
+        DocumentSource source = new FileDocumentSource(new File("data/artery-microdata-ok.html"));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         TripleHandler handler = new NTriplesWriter(out);
         try {
@@ -51,14 +56,16 @@ public class Example {
         System.out.println(n3);
     }
 
+    /**
+     *
+     * @throws IOException
+     * @throws URISyntaxException
+     * @throws ExtractionException
+     * @throws TripleHandlerException
+     */
     private static void exampleFaultyMicrodata() throws IOException, URISyntaxException, ExtractionException, TripleHandlerException {
         Any23 runner = new Any23();
-        runner.setHTTPUserAgent("test-user-agent");
-        HTTPClient httpClient = runner.getHTTPClient();
-        DocumentSource source = new HTTPDocumentSource(
-                httpClient,
-                "https://dl.dropboxusercontent.com/u/1921135/artery.html"
-        );
+        DocumentSource source = new FileDocumentSource(new File("data/artery-microdata-faulty.html"));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         TripleHandler handler = new NTriplesWriter(out);
         try {
