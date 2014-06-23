@@ -1,15 +1,26 @@
 package net.lifia;
 
+import net.lifia.validation.ItemscopeWithoutEqualsFix;
+import net.lifia.validation.ItemscopeWithoutEqualsRule;
 import org.apache.any23.Any23;
 import org.apache.any23.extractor.ExtractionException;
-import org.apache.any23.http.HTTPClient;
 import org.apache.any23.source.DocumentSource;
 import org.apache.any23.source.FileDocumentSource;
-import org.apache.any23.source.HTTPDocumentSource;
+import org.apache.any23.validator.DefaultDOMDocument;
+import org.apache.any23.validator.DefaultValidator;
+import org.apache.any23.validator.Validator;
+import org.apache.any23.validator.ValidatorException;
 import org.apache.any23.writer.NTriplesWriter;
 import org.apache.any23.writer.TripleHandler;
 import org.apache.any23.writer.TripleHandlerException;
+import org.w3c.dom.Document;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -18,33 +29,19 @@ import java.net.URISyntaxException;
 /**
  * Created by alejandrofernandez on 6/23/14.
  */
-public class Example {
-    public static void main(String[] args) {
-        try {
-            exampleOkMicrodata();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (ExtractionException e) {
-            e.printStackTrace();
-        } catch (TripleHandlerException e) {
-            e.printStackTrace();
-        }
-
-    }
+public abstract class Example {
 
 
     /**
      * Basic data extraction is documented in this page: https://any23.apache.org/dev-data-extraction.html
-     * @throws IOException
-     * @throws URISyntaxException
-     * @throws ExtractionException
-     * @throws TripleHandlerException
+     *
+     * @throws java.io.IOException
+     * @throws java.net.URISyntaxException
+     * @throws org.apache.any23.extractor.ExtractionException
+     * @throws org.apache.any23.writer.TripleHandlerException
      */
-    private static void exampleOkMicrodata() throws IOException, URISyntaxException, ExtractionException, TripleHandlerException {
+    public String extract(DocumentSource source) throws IOException, URISyntaxException, ExtractionException, TripleHandlerException {
         Any23 runner = new Any23();
-        DocumentSource source = new FileDocumentSource(new File("data/artery-microdata-ok.html"));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         TripleHandler handler = new NTriplesWriter(out);
         try {
@@ -53,30 +50,9 @@ public class Example {
             handler.close();
         }
         String n3 = out.toString("UTF-8");
-        System.out.println(n3);
+        return n3;
     }
 
-    /**
-     * Example using rules and fixes to detect and repair DOM problems
-     * Explained here: https://any23.apache.org/dev-validation-fix.html
-     * Rule and Fix are in the validation package
-     *
-     * @throws IOException
-     * @throws URISyntaxException
-     * @throws ExtractionException
-     * @throws TripleHandlerException
-     */
-    private static void exampleFaultyMicrodata() throws IOException, URISyntaxException, ExtractionException, TripleHandlerException {
-        Any23 runner = new Any23();
-        DocumentSource source = new FileDocumentSource(new File("data/artery-microdata-faulty.html"));
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        TripleHandler handler = new NTriplesWriter(out);
-        try {
-            runner.extract(source, handler);
-        } finally {
-            handler.close();
-        }
-        String n3 = out.toString("UTF-8");
-        System.out.println(n3);
-    }
+
+
 }

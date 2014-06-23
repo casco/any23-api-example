@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by alejandrofernandez on 6/23/14.
  */
-public class ItescopeWithoutEqualsRule implements Rule {
+public class ItemscopeWithoutEqualsRule implements Rule {
     @Override
     public String getHRName() {
         return "missing-equals-for-itemscope-rule";
@@ -19,12 +19,13 @@ public class ItescopeWithoutEqualsRule implements Rule {
 
     @Override
     public boolean applyOn(DOMDocument document, RuleContext context, ValidationReportBuilder validationReportBuilder) {
-        List<Node> metas = document.getNodes("@itemscope");
+        List<Node> itemScopes = document.getNodes("//@itemscope");
         boolean foundPrecondition = false;
-        for (Node div : metas) {
-            Node propertyNode = div.getAttributes().getNamedItem("itemscope");
-            if( propertyNode != null) {
+        for (Node itemScope : itemScopes) {
+
+            if( itemScope != null) {
                 foundPrecondition = true;
+                System.out.println(itemScope.toString());
                 break;
             }
         }
