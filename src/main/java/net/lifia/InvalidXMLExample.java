@@ -1,20 +1,17 @@
 package net.lifia;
 
-import net.lifia.validation.ItemscopeWithoutEqualsFix;
-import net.lifia.validation.ItemscopeWithoutEqualsRule;
+import org.apache.any23.Any23;
 import org.apache.any23.extractor.ExtractionException;
-import org.apache.any23.source.FileDocumentSource;
-import org.apache.any23.validator.DefaultDOMDocument;
-import org.apache.any23.validator.DefaultValidator;
-import org.apache.any23.validator.Validator;
+import org.apache.any23.source.StringDocumentSource;
 import org.apache.any23.validator.ValidatorException;
+import org.apache.any23.writer.NTriplesWriter;
+import org.apache.any23.writer.TripleHandler;
 import org.apache.any23.writer.TripleHandlerException;
-import org.w3c.dom.Document;
+import org.jsoup.Jsoup;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -22,15 +19,33 @@ import java.net.URISyntaxException;
 /**
  * Created by alejandrofernandez on 6/23/14.
  */
-public class InvalidXMLExample extends Example {
+public class InvalidXMLExample {
+
+    public String extract() throws IOException, URISyntaxException, ExtractionException, TripleHandlerException,
+            SAXException, ParserConfigurationException, ValidatorException {
+
+        //If I don't use JSoup it will not work due to malformed html (missing ="" in itemscope attributes)
+        String fixedContent = Jsoup.parse(new File("data/artery-microdata-faulty.html"),
+                "UTF-8", "http://example.com/").outerHtml();
+
+        Any23 runner = new Any23();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        TripleHandler handler = new NTriplesWriter(out);
+        StringDocumentSource documentSource = new StringDocumentSource(fixedContent, "http://example.com/");
+        try {
+            runner.extract(documentSource, handler);
+        } finally {
+            handler.close();
+        }
+        String n3 = out.toString("UTF-8");
+        return n3;
+    }
 
     public static void main(String[] args) {
         InvalidXMLExample exa = new InvalidXMLExample();
 
         try {
-            File file = new File("data/artery-microdata-faulty.html");
-            //exa.validateAndFix(file);
-            String n3 = exa.extract(new FileDocumentSource(file));
+            String n3 = exa.extract();
             System.out.println(n3);
         } catch (IOException e) {
             e.printStackTrace();
@@ -47,27 +62,6 @@ public class InvalidXMLExample extends Example {
         } catch (ValidatorException e) {
             e.printStackTrace();
         }
-
     }
 
-    /**
-     * TODO: try to use this to fix the problem...
-     * @param file
-     * @throws javax.xml.parsers.ParserConfigurationException
-     * @throws java.io.IOException
-     * @throws org.xml.sax.SAXException
-     * @throws org.apache.any23.validator.ValidatorException
-     */
-    public void validateAndFix(File file) throws ParserConfigurationException, IOException, SAXException, ValidatorException {
-
-        DocumentBuilderFactory factory =  DocumentBuilderFactory.newInstance();
-        //The missing equals problems raises an exception in the parser.
-        factory.setValidating(false);
-        DocumentBuilder documentBuilder = factory.newDocumentBuilder();
-        Document doc = documentBuilder.parse(file);
-        Validator validator = new DefaultValidator();
-        validator.addRule(ItemscopeWithoutEqualsRule.class, ItemscopeWithoutEqualsFix.class);
-        validator.validate(new DefaultDOMDocument(file.toURI(),doc), true);
-
-    }
 }
